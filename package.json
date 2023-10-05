@@ -4,7 +4,7 @@
   "description": "A blockchain written in Javascript",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --watch"
   },
   "author": "Cameron O'Rourke <cameron.orourke@gmail.com>",
   "license": "MIT",
