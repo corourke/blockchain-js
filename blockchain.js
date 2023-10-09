@@ -1,9 +1,8 @@
 const Block = require('./block')
 
 class Blockchain {
-  #chain
   constructor() {
-    this.#chain = [this.createGenesisBlock()]
+    this.chain = [this.createGenesisBlock()]
   }
 
   createGenesisBlock() {
@@ -16,43 +15,61 @@ class Blockchain {
   }
 
   getLastBlock() {
-    return this.#chain[this.#chain.length - 1]
+    return this.chain[this.chain.length - 1]
   }
 
   getBlock(n) {
-    if (n < 0 || n >= this.#chain.length || Math.trunc(n) != n) return undefined
-    return this.#chain[n]
+    if (n < 0 || n >= this.chain.length || Math.trunc(n) != n) return undefined
+    return this.chain[n]
   }
 
   addBlock(data) {
     const prevBlock = this.getLastBlock()
     const newBlock = new Block({
-      index: prevBlock.getIndex() + 1,
+      index: prevBlock.index + 1,
       timestamp: Date.now(),
       data,
-      previousHash: prevBlock.getHash(),
+      previousHash: prevBlock.hash,
     })
-    this.#chain.push(newBlock)
+    this.chain.push(newBlock)
   }
 
   isValidChain() {
-    for (let i = 1; i < this.#chain.length; i++) {
-      const currentBlock = this.#chain[i]
-      const previousBlock = this.#chain[i - 1]
+    return Blockchain.validateChain(this.chain)
+  }
+
+  static validateChain(chain) {
+    for (let i = 1; i < chain.length; i++) {
+      const currentBlock = chain[i]
+      const previousBlock = chain[i - 1]
 
       // The current block
-      if (currentBlock.getHash() !== currentBlock.calculateHash()) {
+      if (currentBlock.hash !== currentBlock.calculateHash()) {
         return false
       }
 
       // Prior block
-      if (currentBlock.getPreviousHash() !== previousBlock.getHash()) {
+      if (currentBlock.previousHash !== previousBlock.hash) {
         return false
       }
     }
 
     return true
   }
+
+  // Replacement chain must be longer and valid
+  replaceChain(newChain) {
+    if (Blockchain.validateChain(newChain) == false) {
+      console.error('When replacing chain, new chain was not valid.')
+    } else if (newChain.length <= this.chain.length) {
+      console.error(
+        'When replacing chain, new chain was not longer than original chain.'
+      )
+    } else {
+      this.chain = newChain
+      console.log('Replacing chain')
+    }
+  }
 }
 
-module.exports = Blockchain
+module.exports = { Blockchain }
