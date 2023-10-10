@@ -1,5 +1,5 @@
 const Block = require('./block')
-
+const { GENESIS_DATA } = require('./config')
 class Blockchain {
   constructor() {
     this.chain = [this.createGenesisBlock()]
@@ -8,9 +8,9 @@ class Blockchain {
   createGenesisBlock() {
     return new Block({
       index: 0,
-      timestamp: Date.now(),
-      data: 'Genesis Block',
-      previousHash: 'This is awesome',
+      data: GENESIS_DATA.data,
+      previousHash: GENESIS_DATA.previousHash,
+      difficulty: GENESIS_DATA.difficulty,
     })
   }
 
@@ -27,9 +27,9 @@ class Blockchain {
     const prevBlock = this.getLastBlock()
     const newBlock = new Block({
       index: prevBlock.index + 1,
-      timestamp: Date.now(),
       data,
       previousHash: prevBlock.hash,
+      difficulty: prevBlock.difficulty,
     })
     this.chain.push(newBlock)
   }
@@ -39,17 +39,23 @@ class Blockchain {
   }
 
   static validateChain(chain) {
+    let lastDifficulty
     for (let i = 1; i < chain.length; i++) {
       const currentBlock = chain[i]
       const previousBlock = chain[i - 1]
 
-      // The current block
+      // The current block hash is incorrect
       if (currentBlock.hash !== currentBlock.calculateHash()) {
         return false
       }
 
-      // Prior block
+      // Prior block hash doesn't match
       if (currentBlock.previousHash !== previousBlock.hash) {
+        return false
+      }
+
+      // Difficulty can not change by > 1 from block to block
+      if (Math.abs(currentBlock.difficulty - previousBlock.difficulty) > 1) {
         return false
       }
     }

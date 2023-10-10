@@ -1,6 +1,7 @@
 const generateHash = require('./hashing')
 const Block = require('./block')
 const { Blockchain } = require('./blockchain')
+const { GENESIS_DATA } = require('./config')
 
 let blockchain
 
@@ -14,7 +15,7 @@ describe('Blockchain', () => {
   it('starts with a genesis block', () => {
     const block0 = blockchain.getBlock(0)
     expect(block0.index).toEqual(0)
-    expect(block0.data).toBe('Genesis Block')
+    expect(block0.data).toBe(GENESIS_DATA.data)
   })
 
   it('adds a new block', () => {
@@ -25,6 +26,15 @@ describe('Blockchain', () => {
 
   it('can fetch latest block', () => {
     expect(blockchain.getLastBlock().index).toBe(2)
+  })
+
+  describe('when fetching a numbered block', () => {
+    it('gets the correct block', () => {
+      expect(blockchain.getBlock(1).index).toBe(1)
+    })
+    it('returns undefined on a fractional block number', () => {
+      expect(blockchain.getBlock(1.5)).toBeUndefined()
+    })
   })
 
   it('validates a valid chain', () => {
@@ -50,6 +60,20 @@ describe('Blockchain', () => {
       block1.data = { amount: 500 }
       block1.hash = block1.calculateHash()
       block2.hash = block1.hash
+      expect(blockchain.isValidChain()).toBe(false)
+    })
+
+    it('invalidates a chain where the difficulty level changes by > 1', () => {
+      const prevBlock = blockchain.getLastBlock()
+      const newBlock = new Block({
+        index: prevBlock.index + 1,
+        data: { amount: 150 },
+        previousHash: prevBlock.hash,
+        difficulty: prevBlock.difficulty + 2,
+      })
+      blockchain.chain.push(newBlock)
+      blockchain.addBlock({ amount: 200 })
+
       expect(blockchain.isValidChain()).toBe(false)
     })
   })
