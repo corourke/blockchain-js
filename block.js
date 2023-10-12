@@ -1,4 +1,4 @@
-const generateHash = require('./hashing')
+const { hash, stringify } = require('./utils')
 
 class Block {
   constructor({ index, data, previousHash, difficulty }) {
@@ -15,12 +15,12 @@ class Block {
   }
 
   calculateHash() {
-    return generateHash(
+    return hash(
       this.index +
         this.timestamp +
         this.nonce +
         this.difficulty +
-        (typeof this.data == 'string' ? this.data : JSON.stringify(this.data)) + // if !type string
+        stringify(this.data) +
         this.previousHash
     )
   }

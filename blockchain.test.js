@@ -1,4 +1,3 @@
-const generateHash = require('./hashing')
 const Block = require('./block')
 const { Blockchain } = require('./blockchain')
 const { GENESIS_DATA } = require('./config')

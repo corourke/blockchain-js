@@ -1,4 +1,4 @@
-const generateHash = require('./hashing')
+const { hash } = require('./utils')
 const Block = require('./block')
 const { GENESIS_DATA, MINE_RATE } = require('./config')
 
@@ -22,7 +22,7 @@ describe('Block', () => {
   })
   it('has the correct hash', () => {
     expect(block.hash).toEqual(
-      generateHash(
+      hash(
         // assuming data is a string otherwise need to JSON.stringify
         block.index +
           block.timestamp +
